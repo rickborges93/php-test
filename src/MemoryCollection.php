@@ -2,6 +2,8 @@
 
 namespace Live\Collection;
 
+use DateTime;
+
 /**
  * Memory collection
  *
@@ -33,15 +35,21 @@ class MemoryCollection implements CollectionInterface
             return $defaultValue;
         }
 
-        return $this->data[$index];
+        return $this->data[$index]['value'];
     }
 
     /**
      * {@inheritDoc}
      */
-    public function set(string $index, $value)
+    public function set(string $index, $value, int $minutesToExpired = 60)
     {
-        $this->data[$index] = $value;
+        $now = (new DateTime());
+        $expired = $now->modify("+$minutesToExpired minutes")->format('Y-m-d H:i:s');
+
+        $this->data[$index] = [
+            'value' => $value,
+            'expired' => $expired
+        ];
     }
 
     /**
@@ -49,7 +57,14 @@ class MemoryCollection implements CollectionInterface
      */
     public function has(string $index)
     {
-        return array_key_exists($index, $this->data);
+        $indexExists = array_key_exists($index, $this->data);
+        if ($indexExists) {
+            $now = (new DateTime())->format('Y-m-d H:i:s');
+            if (strtotime($now) <= strtotime($this->data[$index]['expired'])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
