@@ -23,9 +23,10 @@ interface CollectionInterface
      *
      * @param string $index
      * @param mixed $value
+     * @param int $minutesToExpired
      * @return void
      */
-    public function set(string $index, $value);
+    public function set(string $index, $value, int $minutesToExpired = 60);
 
     /**
      * Checks whether the collection has the given index
